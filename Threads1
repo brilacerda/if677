@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+char password[11] = "1987654321";
+long  size = 10000000000;
+long senhaInt = 0;
+long resDiv = 0;
+#define nThreads 10
+pthread_t thread[nThreads];
+long limit; 
+
+char transformIntToChar(int val)
+{
+   val = val + 48;
+   return (0 + val);
+}
+
+//eleva as coisas 
+long power (int pow)
+{
+   int j;
+   if (pow == 0)
+   {
+   return 1;
+   } else {
+      long result = 1;
+      for (j = 0; j < pow; j++)
+      { 
+         result = result * 10;
+      }
+         return result;
+      }
+}
+
+long transformPassWordToInt (){
+   long i;
+   
+  for (i = 0; i < 11; i++)
+    {
+      if(i != 10){
+         senhaInt = senhaInt + ((int) password[i] - 48)*(power (10-i));
+         }
+   }   
+    senhaInt = senhaInt/10; //por conta do numero extra alocado por c
+   //C é muito looooooouco pqp pqp pqp pqp pqp pqp
+}
+
+void criaThreads (){
+    long i;
+    for (i = 0; i < nThreads; i++)
+    {
+       pthread_create(&thread[i], NULL, *f, (void *) i);
+    }
+    
+    for (i = 0; i < nThreads; i++)
+    {
+       pthread_join(thread[i], NULL);
+    }
+     
+}
+
+
+void *f (void *arg)                       
+{  
+   long abc = (long) arg;
+   long j;
+   
+   if(abc == (nThreads-1))  { 
+      limit = size-1; //se for a última thread o limite vai até 9999999999
+   } else {
+      limit = (resDiv*(abc+1))-1; //se não o intervalo é fixo
+   }
+   
+   
+    for (j= resDiv*abc; (j < limit)&&(senhaInt == j); j++)
+    {
+       printf ("YAY! A Thread %ld encontrou a senha %ld \n", abc, j);
+    }
+    pthread_exit(NULL);
+}
+
+int main()
+{
+   int i;
+   
+   resDiv = size/nThreads;
+   
+   printf ("divisao?: %ld \n", resDiv);
+    
+   transformPassWordToInt(); 
+   printf ("senha?: %ld \n", senhaInt);      
+  
+   criaThreads();
+
+    return 0;
+}
+
+//#48-57 == 0-9 em ascii
