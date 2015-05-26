@@ -1,59 +1,65 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-//using namespace std;
 
-int nThreads, n1, n2;
+int nThreads;
+int n1, n2, qtdEquipe, qtdMembro;
+int array[10000000][2];
+pthread_mutex_t mymutex;
 
-
-int *mdc (){
-   int  resto;
-   
-   resto = n1%n2;
+int mdc (int n1, int n2){
+    int  resto;
+     resto = n1%n2;
        
-              while(resto!=0)
-              {
-                  n1    = n2;
-                  n2    = resto;
-                  resto = n1%n2;        
-              }
-              return n2;
+   while(resto!=0)
+   {
+      n1    = n2;
+      n2    = resto;
+      resto = n1%n2;        
+   }
+   return  n2;
 }
 
-void criaThreads (){
-    long i;
-    for (i = 0; i < nThreads; i++)
-    {
-       pthread_create(&thread[i], NULL, *mdc, (void *) &i);
-    }
-    
-    for (i = 0; i < nThreads; i++)
-    {
-       pthread_join(thread[i], NULL);
-    }
+void * aux (void * arg){
+	int id = (int) arg;
+
+	pthread_mutex_lock(&mymutex); 
+	 
+	int k, result = 0;	  
+   for(k = id; k < (qtdEquipe*qtdMembro); k+=qtdMembro)
+   {	
+		result += mdc (array[k][1], array[k][2]);
+   }
+	id++;
+	printf("%dº turno: %d\n", id, result);
+	pthread_mutex_unlock(&mymutex); 
 }
 
 int main (int argc, char **argv){
-     
-   int i, j, qtdEquipe, qtdMembro;
    
-   scanf ("%i %i", &qtdEquipe, &qtdMembro);
+   int result, i, k;
+	//memset(array,0,sizeof array*2);
+   
+   scanf ("%d %d", &qtdEquipe, &qtdMembro);
    nThreads = qtdMembro;
-   pthread_t thread[nThreads];
+   pthread_t thread[nThreads]; 
    
-   int array[qtdMembro*qtdEquipe];
-   
-      for (i = 0;i < qtdEquipe;i++) //denota a equipe
-      { 
-          for (j = 0;j < qtdMembro;j++) //denota o membro
-         {
-            scanf("%i %i", &n1, &n2);
-            array[i+j] = (int) mdc(n1, n2);
-      }
+      
+   for (i = 0;i < qtdEquipe*qtdMembro;i++) 
+   { 
+         scanf("%d %d", &array[i][1], &array[i][2]); 
    }
-         
-         criarThreads();
-         
+	
+	pthread_mutex_init(&mymutex, NULL);
+
+   for(i=0; i<nThreads; i++) {
+        pthread_create(&thread[i], NULL, aux, (void*) i);
+    }
+    for(i=0; i<nThreads; i++) {
+        pthread_join(thread[i], NULL);
+    }
+      
+    pthread_exit(NULL);
+
    return 0;
 }
-
