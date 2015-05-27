@@ -3,23 +3,78 @@
 #include <pthread.h>
 
 int nArquivos, nThreads, nProdutos;
+int cont = 1;
 char textbuf[4096];
 char line[256];
+pthread_mutex_t mymutex;
+
 main(){
 	
 	scanf("%d %d %d", &nArquivos, &nThreads, &nProdutos);
 
-	int i;
-	for(i = 0; i < nArquivos; i++){
-		FILE * pFile;
-	  	pFile = fopen ("1.in", "r");
-	  	if (pFile!=NULL)
-	  	{
-			fclose (pFile);
-		} else {
-			fread(textbuf, line, 1, pFile);
-		}
-	}
+	pthread_mutex_init(&mymutex, NULL);
+	for(i=0; i<nThreads; i++) {
+        pthread_create(&thread[i], NULL, aux, (void*) i);
+    }
+    for(i=0; i<nThreads; i++) {
+        pthread_join(thread[i], NULL);
+    }
+
 	return 0;
 
 }
+
+//função não está pronta
+char[] intToString (int num){
+	int aux, pos = 6;
+	char arq[10] = {0, 0, 0, 0 ,0, 0, 0, '.', 'i', 'n'};
+	int num = 123;
+	
+	aux = (num % 10);
+	printf("%d\n", num);
+	char aux2 =  (char) (aux + 30);
+	printf("%c\n", aux2);
+	arq[pos] = aux2;
+	
+	printf("%s\n", arq);
+}
+
+void * readFile (void * arg){
+	int number;
+	pthread_mutex_lock(&mymutex); 
+
+	while(cont <= nArquivos){
+		number = cont;
+		cont++;
+		pthread_mutex_unlock(&mymutex); 
+
+		readLine(number);
+		
+		
+
+
+		pthread_mutex_lock(&mymutex); 
+	}
+}
+
+
+
+string readLine(int number){
+	//string str = number + ".in";
+	//
+	// int i;
+	// for(i = 0; i < nArquivos; i++)
+	// {
+	// 	FILE * pFile;
+	// 	pFile = fopen (str, "r");
+	
+	// 	if (pFile!=NULL)
+	// 	{
+	// 		fclose (pFile);
+	//		return "";
+	// 	} else {
+	// 		return fread(textbuf, line, 1, pFile);
+	// 	}
+	// }
+}
+
